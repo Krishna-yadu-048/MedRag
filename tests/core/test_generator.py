@@ -73,3 +73,16 @@ def test_retrieval_context_is_full_text_of_every_chunk():
 
     assert len(context) == 6
     assert context[0] == long_text
+
+
+def test_rerank_keeps_best_n_by_cross_encoder_and_normalizes_scores():
+    from src.core.retriever import rerank_nodes
+
+    nodes = [_scored(0.9, "target ranges"), _scored(0.8, "first-line drug classes"), _scored(0.7, "lab tests")]
+    logits = {"target ranges": -2.0, "first-line drug classes": 6.0, "lab tests": 1.0}
+
+    kept = rerank_nodes(nodes, "first-line drugs?", lambda q, texts: [logits[t] for t in texts], 2)
+
+    assert [n.node.text for n in kept] == ["first-line drug classes", "lab tests"]
+    assert all(0.0 < n.score < 1.0 for n in kept)
+    assert kept[0].score > 0.99

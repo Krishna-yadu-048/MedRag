@@ -32,7 +32,9 @@ class AppSettings:
     guardrail_timeout_seconds: float
     prompt_guard_threshold: float
     sparse_embedding_model: str = "Qdrant/bm25"
-    relative_score_cutoff: float = 0.9
+    relative_score_cutoff: float = 0.0
+    rerank_model: str = "Xenova/ms-marco-MiniLM-L-6-v2"
+    rerank_top_n: int = 2
 
     @classmethod
     def from_env(cls) -> "AppSettings":
@@ -46,10 +48,10 @@ class AppSettings:
                 os.getenv("EMBEDDING_OUTPUT_DIMENSIONALITY", "384")
             ),
             embedding_batch_size=int(os.getenv("EMBEDDING_BATCH_SIZE", "16")),
-            chunk_size=int(os.getenv("CHUNK_SIZE", "512")),
-            chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "64")),
+            chunk_size=int(os.getenv("CHUNK_SIZE", "256")),
+            chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "32")),
             query_mode=os.getenv("VECTOR_STORE_QUERY_MODE", "default"),
-            similarity_top_k=int(os.getenv("SIMILARITY_TOP_K", "4")),
+            similarity_top_k=int(os.getenv("SIMILARITY_TOP_K", "8")),
             sparse_top_k=int(os.getenv("SPARSE_TOP_K", "8")),
             hybrid_alpha=float(os.getenv("HYBRID_ALPHA", "0.5")),
             groq_api_key=os.getenv("GROQ_API_KEY") or None,
@@ -62,7 +64,9 @@ class AppSettings:
             guardrail_timeout_seconds=float(os.getenv("GUARDRAIL_TIMEOUT_SECONDS", "2.0")),
             prompt_guard_threshold=float(os.getenv("PROMPT_GUARD_THRESHOLD", "0.5")),
             sparse_embedding_model=os.getenv("SPARSE_EMBEDDING_MODEL", "Qdrant/bm25"),
-            relative_score_cutoff=float(os.getenv("RELATIVE_SCORE_CUTOFF", "0.9")),
+            relative_score_cutoff=float(os.getenv("RELATIVE_SCORE_CUTOFF", "0")),
+            rerank_model=os.getenv("RERANK_MODEL", "Xenova/ms-marco-MiniLM-L-6-v2"),
+            rerank_top_n=int(os.getenv("RERANK_TOP_N", "2")),
         )
 
 

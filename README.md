@@ -223,9 +223,11 @@ docker compose up -d
 | `PUBMED_ENABLED` | `true` | Toggle PubMed ingestion |
 | `PUBMED_QUERY_LIMIT` | `1` | How many of `MedRAGIngestor.pubmed_queries` actually run |
 | `PUBMED_MAX_RESULTS` | `5` | Abstracts fetched per PubMed query |
-| `CHUNK_SIZE` / `CHUNK_OVERLAP` | `512` / `64` | Sentence splitter settings |
-| `SIMILARITY_TOP_K` | `4` | Chunks retrieved per question before the cutoff |
-| `RELATIVE_SCORE_CUTOFF` | `0.9` | Drop chunks scoring below this × the best match; `0` disables |
+| `CHUNK_SIZE` / `CHUNK_OVERLAP` | `256` / `32` | Sentence splitter settings |
+| `SIMILARITY_TOP_K` | `8` | Candidate chunks retrieved per question before reranking |
+| `RERANK_MODEL` | `Xenova/ms-marco-MiniLM-L-6-v2` | Cross-encoder that re-scores candidates; empty disables |
+| `RERANK_TOP_N` | `2` | Chunks kept after reranking and sent to the LLM |
+| `RELATIVE_SCORE_CUTOFF` | `0` | Used only without a reranker: drop chunks below this × the best score |
 | `VECTOR_STORE_QUERY_MODE` | `default` | `default` or `hybrid` (dense + BM25 sparse); reindex after switching |
 | `GROQ_PROMPT_GUARD_MODEL` | `meta-llama/llama-prompt-guard-2-86m` | Input guardrail model |
 | `GROQ_SAFEGUARD_MODEL` | `openai/gpt-oss-safeguard-20b` | Output guardrail model |

@@ -5,6 +5,7 @@ from typing import Any
 
 from src.core.generator import answer_question
 from src.core.indexer import build_index, collection_exists, load_index
+from src.core.retriever import warm_reranker
 from src.core.projects import ProjectDefinition, get_project_definition
 from src.core.schemas import QueryArtifacts
 from src.core.settings import AppSettings, get_settings
@@ -50,6 +51,7 @@ class RAGService:
                 "Run the indexing command first."
             )
         self.index = load_index(config=self.config, settings=self.settings)
+        warm_reranker(self.settings)
         return self.index
 
     def query(self, question: str) -> QueryArtifacts:
