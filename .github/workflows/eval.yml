@@ -25,8 +25,21 @@ jobs:
         run: uv sync --extra dev
       - name: Run unit tests
         run: uv run pytest tests
+      # The Qdrant service starts empty; without this step the eval test skips itself
+      # ("collection is not indexed yet") and the workflow passes without evaluating anything.
+      - name: Build MedRAG index
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LLAMA_CLOUD_API_KEY: ${{ secrets.LLAMA_CLOUD_API_KEY }}
+          QDRANT_HOST: localhost
+          QDRANT_PORT: "6333"
+        run: |
+          uv run python -m src.wait_for qdrant --host localhost --port 6333 --timeout 120
+          uv run python -m src.cli index --project medrag
       - name: Run MedRAG eval
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LLAMA_CLOUD_API_KEY: ${{ secrets.LLAMA_CLOUD_API_KEY }}
+          QDRANT_HOST: localhost
+          QDRANT_PORT: "6333"
         run: uv run pytest eval/medrag/test_medrag.py -s

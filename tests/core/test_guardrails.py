@@ -130,3 +130,28 @@ def test_check_safeguard_policy_noop_without_key():
     result = check_safeguard_policy("question", "answer", POLICY, _settings(groq_api_key=None))
 
     assert result.allowed is True
+
+
+def test_check_safeguard_policy_parses_fenced_json(monkeypatch):
+    monkeypatch.setattr(
+        "src.core.guardrails._groq_client",
+        lambda settings: _mock_client(
+            '```json\n{"violation": 1, "category": "dosage", "rationale": "Gives a dose."}\n```'
+        ),
+    )
+
+    result = check_safeguard_policy("question", "answer", POLICY, _settings())
+
+    assert result.allowed is False
+    assert result.reason == "Gives a dose."
+
+
+def test_check_safeguard_policy_treats_string_zero_as_allowed(monkeypatch):
+    monkeypatch.setattr(
+        "src.core.guardrails._groq_client",
+        lambda settings: _mock_client('{"violation": "0", "category": null, "rationale": "ok"}'),
+    )
+
+    result = check_safeguard_policy("question", "answer", POLICY, _settings())
+
+    assert result.allowed is True

@@ -31,6 +31,7 @@ class AppSettings:
     groq_safeguard_model: str
     guardrail_timeout_seconds: float
     prompt_guard_threshold: float
+    sparse_embedding_model: str = "Qdrant/bm25"
 
     @classmethod
     def from_env(cls) -> "AppSettings":
@@ -59,6 +60,7 @@ class AppSettings:
             ),
             guardrail_timeout_seconds=float(os.getenv("GUARDRAIL_TIMEOUT_SECONDS", "2.0")),
             prompt_guard_threshold=float(os.getenv("PROMPT_GUARD_THRESHOLD", "0.5")),
+            sparse_embedding_model=os.getenv("SPARSE_EMBEDDING_MODEL", "Qdrant/bm25"),
         )
 
 

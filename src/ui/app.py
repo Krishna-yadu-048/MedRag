@@ -49,6 +49,24 @@ OUTPUT_GUARDRAIL_PRESETS = {
 }
 
 
+def _response_detail(response: requests.Response) -> str:
+    """Return the API's error `detail` message instead of the raw JSON body."""
+    try:
+        detail = response.json().get("detail")
+    except (ValueError, AttributeError):
+        detail = None
+    if isinstance(detail, str) and detail:
+        return detail
+    return response.text or f"HTTP {response.status_code}"
+
+
+def _describe_error(exc: requests.RequestException) -> str:
+    response = getattr(exc, "response", None)
+    if response is not None:
+        return f"{response.status_code}: {_response_detail(response)}"
+    return str(exc)
+
+
 def _get_health() -> dict | None:
     try:
         response = requests.get(f"{API_BASE_URL}/health", timeout=10)
@@ -64,7 +82,7 @@ def _get_sources() -> tuple[dict | None, str | None]:
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _reindex_sources() -> tuple[dict | None, str | None]:
@@ -76,7 +94,7 @@ def _reindex_sources() -> tuple[dict | None, str | None]:
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _get_latest_eval_results() -> tuple[dict | None, str | None]:
@@ -87,7 +105,7 @@ def _get_latest_eval_results() -> tuple[dict | None, str | None]:
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _run_eval() -> tuple[dict | None, str | None]:
@@ -99,7 +117,7 @@ def _run_eval() -> tuple[dict | None, str | None]:
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _get_guardrail_status() -> tuple[dict | None, str | None]:
@@ -108,7 +126,7 @@ def _get_guardrail_status() -> tuple[dict | None, str | None]:
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _test_input_guardrail(question: str) -> tuple[dict | None, str | None]:
@@ -121,7 +139,7 @@ def _test_input_guardrail(question: str) -> tuple[dict | None, str | None]:
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _test_output_guardrail(question: str, answer: str) -> tuple[dict | None, str | None]:
@@ -134,7 +152,7 @@ def _test_output_guardrail(question: str, answer: str) -> tuple[dict | None, str
         response.raise_for_status()
         return response.json(), None
     except requests.RequestException as exc:
-        return None, str(exc)
+        return None, _describe_error(exc)
 
 
 def _format_size(size_bytes: int) -> str:
@@ -158,7 +176,7 @@ def _render_source_table(sources: list[dict]) -> None:
             }
             for source in sources
         ],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -194,7 +212,7 @@ def _render_pubmed_status(pubmed: dict) -> None:
             }
             for summary in summaries
         ],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -228,7 +246,7 @@ def _render_eval_results(payload: dict) -> None:
         for case in payload["cases"]
     ]
     st.subheader("Case Overview")
-    st.dataframe(case_rows, use_container_width=True, hide_index=True)
+    st.dataframe(case_rows, width="stretch", hide_index=True)
 
     st.subheader("Case Details")
     for case in payload["cases"]:
@@ -261,7 +279,7 @@ def _render_eval_results(payload: dict) -> None:
                     }
                     for metric in case["metrics"]
                 ],
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 
@@ -325,7 +343,7 @@ with query_tab:
                     st.caption(f"Confidence: {data['confidence']}")
                     st.info(data["disclaimer"])
                 else:
-                    st.error(response.text)
+                    st.error(_response_detail(response))
 
 with sources_tab:
     st.caption(
@@ -362,7 +380,7 @@ with sources_tab:
                     st.success("Uploaded sources and rebuilt the collection.")
                     st.rerun()
         except requests.RequestException as exc:
-            st.error(f"Upload failed: {exc}")
+            st.error(f"Upload failed: {_describe_error(exc)}")
 
     source_payload, sources_error = _get_sources()
     if sources_error:
@@ -396,7 +414,7 @@ with sources_tab:
                             st.success(f"Deleted '{selected_source}' and rebuilt the collection.")
                             st.rerun()
                 except requests.RequestException as exc:
-                    st.error(f"Delete failed: {exc}")
+                    st.error(f"Delete failed: {_describe_error(exc)}")
 
         if st.button("Rebuild index from current sources"):
             with st.spinner("Rebuilding the collection from current sources..."):

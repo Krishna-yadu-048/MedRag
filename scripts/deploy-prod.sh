@@ -9,6 +9,7 @@ RUNTIME_DIR="${DEPLOY_ROOT}/runtime"
 RUNTIME_ENV_FILE="${RUNTIME_DIR}/app.env"
 PREVIOUS_ENV_FILE="${RUNTIME_DIR}/app.env.previous"
 TMP_ROOT="${DEPLOY_ROOT}/tmp"
+DATA_DIR="${DEPLOY_ROOT}/data/medrag"
 SECRET_FILE_TO_CLEANUP=""
 
 AWS_REGION="${AWS_REGION:?AWS_REGION is required}"
@@ -73,6 +74,8 @@ render_runtime_env() {
     printf 'APP_IMAGE=%s\n' "${APP_IMAGE}"
     printf 'OPENAI_API_KEY=%s\n' "$(jq -er '.OPENAI_API_KEY' "${secret_file}")"
     printf 'LLAMA_CLOUD_API_KEY=%s\n' "$(jq -er '.LLAMA_CLOUD_API_KEY' "${secret_file}")"
+    # Optional: without it the API's guardrails no-op and allow everything through.
+    printf 'GROQ_API_KEY=%s\n' "$(jq -r '.GROQ_API_KEY // empty' "${secret_file}")"
   } >> "${RUNTIME_ENV_FILE}"
   chmod 600 "${RUNTIME_ENV_FILE}"
 }
@@ -143,6 +146,13 @@ main() {
 
   log "Pulling updated images"
   docker compose -f "${CURRENT_LINK}/docker-compose.prod.yml" --env-file "${RUNTIME_ENV_FILE}" pull
+
+  # The prod compose file mounts ${DATA_DIR} over the image's data directory, which would hide
+  # the guideline PDFs baked into the image. Copy them in once, never overwriting uploads.
+  log "Seeding MedRAG data directory from the image (existing files are kept)"
+  install -d -m 0755 "${DATA_DIR}"
+  docker run --rm --entrypoint sh -v "${DATA_DIR}:/seed" "${APP_IMAGE}" \
+    -c 'cp -a -n /app/src/projects/medrag/data/. /seed/'
 
   log "Starting qdrant"
   docker compose -f "${CURRENT_LINK}/docker-compose.prod.yml" --env-file "${RUNTIME_ENV_FILE}" up -d qdrant

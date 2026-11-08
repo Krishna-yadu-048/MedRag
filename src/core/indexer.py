@@ -106,10 +106,25 @@ def build_index(
 def load_index(config: ProjectConfig, settings: AppSettings) -> "VectorStoreIndex":
     from llama_index.core import VectorStoreIndex
 
+    if settings.query_mode == "hybrid" and not _collection_has_sparse_vectors(config, settings):
+        raise RuntimeError(
+            f"VECTOR_STORE_QUERY_MODE=hybrid, but collection '{config.collection_name}' was "
+            "indexed without sparse vectors. Rebuild the index (POST /sources/reindex or "
+            "`python -m src.cli index`) with hybrid mode enabled."
+        )
     vector_store = _build_vector_store(config, settings)
     embed_model = _build_embed_model(settings)
     _warm_embed_model(embed_model)
     return VectorStoreIndex.from_vector_store(vector_store=vector_store, embed_model=embed_model)
+
+
+def _collection_has_sparse_vectors(config: ProjectConfig, settings: AppSettings) -> bool:
+    client = build_qdrant_client(settings)
+    try:
+        params = client.get_collection(config.collection_name).config.params
+    except Exception:
+        return False
+    return bool(getattr(params, "sparse_vectors", None))
 
 
 def collection_exists(config: ProjectConfig, settings: AppSettings) -> bool:
@@ -147,7 +162,16 @@ def _build_vector_store(config: ProjectConfig, settings: AppSettings):
     from llama_index.vector_stores.qdrant import QdrantVectorStore
 
     client = build_qdrant_client(settings)
+    hybrid_kwargs: dict[str, Any] = {}
+    if settings.query_mode == "hybrid":
+        # Hybrid queries need sparse vectors stored alongside the dense ones; without
+        # enable_hybrid, LlamaIndex rejects every hybrid query at runtime.
+        hybrid_kwargs = {
+            "enable_hybrid": True,
+            "fastembed_sparse_model": settings.sparse_embedding_model,
+        }
     return QdrantVectorStore(
         client=client,
         collection_name=config.collection_name,
+        **hybrid_kwargs,
     )

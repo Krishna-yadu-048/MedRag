@@ -35,6 +35,25 @@ def _chat_completion(client: httpx.Client, model: str, messages: list[dict[str, 
     return response.json()["choices"][0]["message"]["content"]
 
 
+def _parse_verdict(content: str) -> dict:
+    """Parse the safeguard model's JSON, tolerating ```json fences or surrounding prose."""
+    text = content.strip()
+    start, end = text.find("{"), text.rfind("}")
+    if start != -1 and end > start:
+        text = text[start : end + 1]
+    verdict = json.loads(text)
+    if not isinstance(verdict, dict):
+        raise ValueError(f"Safeguard verdict is not a JSON object: {content!r}")
+    return verdict
+
+
+def _is_violation(value: object) -> bool:
+    # bool("0") is True, so a string "0" must not be treated as a violation.
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes"}
+    return bool(value)
+
+
 def check_prompt_injection(question: str, settings: AppSettings) -> GuardrailResult:
     client = _groq_client(settings)
     if client is None:
@@ -82,12 +101,12 @@ def check_safeguard_policy(
                     },
                 ],
             )
-            verdict = json.loads(content)
+            verdict = _parse_verdict(content)
     except Exception:
         logger.warning("Safeguard call failed; allowing answer through.", exc_info=True)
         return GuardrailResult(allowed=True)
 
-    if verdict.get("violation"):
+    if _is_violation(verdict.get("violation")):
         reason = str(verdict.get("rationale") or verdict.get("category") or "policy violation")
         logger.info("Guardrail blocked at output: %s", reason)
         return GuardrailResult(allowed=False, reason=reason)

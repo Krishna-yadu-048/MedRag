@@ -33,6 +33,7 @@ dev = [
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
   "ruff>=0.11,<0.12",
+  "reportlab>=4,<5",
 ]
 
 [project.scripts]

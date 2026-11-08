@@ -35,15 +35,26 @@ def _dedupe_sources(source_nodes: list[Any]) -> list[str]:
     for source_node in source_nodes:
         metadata = getattr(getattr(source_node, "node", None), "metadata", {}) or {}
         source_org = metadata.get("source_org") or metadata.get("source") or "Unknown source"
-        source_file = metadata.get("source_file") or metadata.get("title") or "Unknown document"
+        label = f"{source_org}: {_document_name(metadata)}"
         page = metadata.get("page")
-        label = f"{source_org}: {source_file}"
         if page is not None:
             label = f"{label} (page {page})"
         if label not in seen:
             seen.append(label)
     return seen
 
+
+# Placeholder file names shared by many documents; a per-document title is more useful.
+_GENERIC_SOURCE_FILES = {"bootstrap_seed"}
+
+
+def _document_name(metadata: dict[str, Any]) -> str:
+    source_file = metadata.get("source_file")
+    # PubmedReader stores the paper title under this key, not under "title".
+    title = metadata.get("title") or metadata.get("Title of this paper")
+    if source_file and source_file not in _GENERIC_SOURCE_FILES:
+        return str(source_file)
+    return str(title or source_file or "Unknown document")
 
 
 def _context_snippets(source_nodes: list[Any]) -> list[str]:

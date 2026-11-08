@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+from contextlib import asynccontextmanager
 from threading import RLock
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -35,10 +36,6 @@ service = RAGService.from_project_name(settings.active_project, settings=setting
 source_manager = SourceManager(service.config)
 service_lock = RLock()
 
-app = FastAPI(title="RAG Toolkit API")
-
-
-@app.on_event("startup")
 def warm_query_stack() -> None:
     if not service.collection_ready():
         return
@@ -47,6 +44,15 @@ def warm_query_stack() -> None:
         logger.info("MedRAG query stack warmed for collection '%s'.", service.config.collection_name)
     except Exception:
         logger.exception("Failed to warm MedRAG query stack during startup.")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    warm_query_stack()
+    yield
+
+
+app = FastAPI(title="RAG Toolkit API", lifespan=lifespan)
 
 
 

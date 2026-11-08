@@ -57,8 +57,10 @@ services:
     volumes:
       - ./src/projects/medrag/data:/app/src/projects/medrag/data
     depends_on:
-      - qdrant
-      - indexer
+      qdrant:
+        condition: service_started
+      indexer:
+        condition: service_completed_successfully
     command:
       - uvicorn
       - src.api.main:app
