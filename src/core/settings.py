@@ -32,6 +32,7 @@ class AppSettings:
     guardrail_timeout_seconds: float
     prompt_guard_threshold: float
     sparse_embedding_model: str = "Qdrant/bm25"
+    relative_score_cutoff: float = 0.9
 
     @classmethod
     def from_env(cls) -> "AppSettings":
@@ -48,7 +49,7 @@ class AppSettings:
             chunk_size=int(os.getenv("CHUNK_SIZE", "1024")),
             chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "100")),
             query_mode=os.getenv("VECTOR_STORE_QUERY_MODE", "default"),
-            similarity_top_k=int(os.getenv("SIMILARITY_TOP_K", "8")),
+            similarity_top_k=int(os.getenv("SIMILARITY_TOP_K", "4")),
             sparse_top_k=int(os.getenv("SPARSE_TOP_K", "8")),
             hybrid_alpha=float(os.getenv("HYBRID_ALPHA", "0.5")),
             groq_api_key=os.getenv("GROQ_API_KEY") or None,
@@ -61,6 +62,7 @@ class AppSettings:
             guardrail_timeout_seconds=float(os.getenv("GUARDRAIL_TIMEOUT_SECONDS", "2.0")),
             prompt_guard_threshold=float(os.getenv("PROMPT_GUARD_THRESHOLD", "0.5")),
             sparse_embedding_model=os.getenv("SPARSE_EMBEDDING_MODEL", "Qdrant/bm25"),
+            relative_score_cutoff=float(os.getenv("RELATIVE_SCORE_CUTOFF", "0.9")),
         )
 
 

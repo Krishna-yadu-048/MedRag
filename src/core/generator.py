@@ -14,7 +14,7 @@ def answer_question(index: Any, question: str, config: ProjectConfig, settings: 
     response = query_engine.query(question)
     source_nodes = list(getattr(response, "source_nodes", []) or [])
     sources = _dedupe_sources(source_nodes)
-    retrieval_context = _context_snippets(source_nodes)
+    retrieval_context = _retrieval_context(source_nodes)
     evidence = _build_evidence_summary(source_nodes)
     confidence = _infer_confidence(source_nodes)
 
@@ -57,14 +57,25 @@ def _document_name(metadata: dict[str, Any]) -> str:
     return str(title or source_file or "Unknown document")
 
 
-def _context_snippets(source_nodes: list[Any]) -> list[str]:
+def _context_snippets(source_nodes: list[Any], max_chars: int = 500) -> list[str]:
     snippets: list[str] = []
-    for source_node in source_nodes[:4]:
+    for source_node in source_nodes:
         text = getattr(getattr(source_node, "node", None), "text", "") or ""
         snippet = " ".join(text.split())
         if snippet:
-            snippets.append(snippet[:500])
+            snippets.append(snippet[:max_chars])
     return snippets
+
+
+def _retrieval_context(source_nodes: list[Any]) -> list[str]:
+    """Full text of every chunk the LLM received, so evals judge what the answer was built on."""
+    return [
+        text
+        for text in (
+            getattr(getattr(node, "node", None), "text", "") or "" for node in source_nodes
+        )
+        if text.strip()
+    ]
 
 
 def _build_evidence_summary(source_nodes: list[Any]) -> str:
@@ -75,9 +86,19 @@ def _build_evidence_summary(source_nodes: list[Any]) -> str:
 
 
 def _infer_confidence(source_nodes: list[Any]) -> str:
-    count = len(source_nodes)
-    if count >= 4:
+    """Grade by the best match's similarity score rather than by how many chunks came back.
+
+    Counting chunks always said "high" with a fixed top_k. The thresholds suit cosine
+    similarity from the default embedding model and are a heuristic, not a calibrated value.
+    """
+    if not source_nodes:
+        return "low"
+    scores = [node.score for node in source_nodes if getattr(node, "score", None) is not None]
+    if not scores:
+        return "moderate"
+    best = max(scores)
+    if best >= 0.8:
         return "high"
-    if count >= 2:
+    if best >= 0.65:
         return "moderate"
     return "low"

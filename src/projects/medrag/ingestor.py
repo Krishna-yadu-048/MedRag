@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
 from llama_index.core.schema import Document
 
 from src.core.base import DocumentIngestor
+
+logger = logging.getLogger(__name__)
 
 
 class MedRAGIngestor(DocumentIngestor):
@@ -109,32 +112,66 @@ class MedRAGIngestor(DocumentIngestor):
                 "LLAMA_CLOUD_API_KEY is required to parse guideline PDFs with LlamaParse."
             )
 
-        from llama_parse import LlamaParse
+        from llama_cloud import LlamaCloud
 
-        parser = LlamaParse(
-            api_key=api_key,
-            result_type="markdown",
-            parsing_instruction=(
-                "Clinical guideline or label with evidence tables, dose recommendations, "
-                "warnings, and section hierarchy. Preserve tables and headings."
-            ),
-        )
+        client = LlamaCloud(api_key=api_key)
+        tier = os.getenv("LLAMA_PARSE_TIER", "cost_effective")
 
         documents = []
         for pdf_path in pdf_paths:
-            parsed_docs = parser.load_data(str(pdf_path))
-            for doc in parsed_docs:
-                metadata = dict(getattr(doc, "metadata", {}) or {})
-                metadata.update(
-                    {
-                        "source_file": pdf_path.name,
-                        "parser": "llamaparse",
-                        "source": "guideline_pdf",
-                    }
+            pages = self._parse_pdf_pages(client, pdf_path, tier)
+            if not pages:
+                raise RuntimeError(f"LlamaParse returned no text for '{pdf_path.name}'.")
+            for page_number, markdown in pages:
+                documents.append(
+                    Document(
+                        text=markdown,
+                        metadata={
+                            "source_file": pdf_path.name,
+                            "page": page_number,
+                            "parser": "llamaparse_v2",
+                            "source": "guideline_pdf",
+                        },
+                    )
                 )
-                doc.metadata = metadata
-                documents.append(doc)
         return documents
+
+    @staticmethod
+    def _parse_pdf_pages(client, pdf_path: Path, tier: str) -> list[tuple[int, str]]:
+        """Parse one PDF with the LlamaParse v2 API and return (page_number, markdown) pairs.
+
+        The v1 API used by the old `llama-parse` package is unavailable to newer accounts,
+        and that package swallowed the error, so PDFs silently dropped out of the index.
+        The v2 client raises on a failed job instead.
+        """
+        options = {}
+        if tier.startswith("agentic"):
+            options["agentic_options"] = {
+                "custom_prompt": (
+                    "Clinical guideline or label with evidence tables, dose recommendations, "
+                    "warnings, and section hierarchy. Preserve tables and headings."
+                )
+            }
+        with pdf_path.open("rb") as handle:
+            result = client.parsing.parse(
+                upload_file=(pdf_path.name, handle, "application/pdf"),
+                tier=tier,
+                version="latest",
+                expand=["markdown"],
+                **options,
+            )
+
+        pages: list[tuple[int, str]] = []
+        failed: list[int] = []
+        for page in getattr(result.markdown, "pages", None) or []:
+            if not getattr(page, "success", False):
+                failed.append(page.page_number)
+                continue
+            if page.markdown.strip():
+                pages.append((page.page_number, page.markdown))
+        if failed:
+            logger.warning("LlamaParse failed on pages %s of '%s'.", failed, pdf_path.name)
+        return pages
 
 
     def _load_pubmed_abstracts(self):

@@ -213,7 +213,8 @@ docker compose up -d
 |---|---|---|
 | `ACTIVE_PROJECT` | `medrag` | Which registered project to serve |
 | `OPENAI_API_KEY` | — | Required for generation |
-| `LLAMA_CLOUD_API_KEY` | — | Required for LlamaParse (guideline PDFs) |
+| `LLAMA_CLOUD_API_KEY` | — | Required for LlamaParse v2 (guideline PDFs) |
+| `LLAMA_PARSE_TIER` | `cost_effective` | LlamaParse tier: `fast`, `cost_effective`, `agentic`, `agentic_plus` |
 | `GROQ_API_KEY` | — | Optional; guardrails no-op and allow everything through if unset |
 | `QDRANT_HOST` / `QDRANT_PORT` | `localhost` / `6333` | Vector store connection |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Generation model |
@@ -223,7 +224,9 @@ docker compose up -d
 | `PUBMED_QUERY_LIMIT` | `1` | How many of `MedRAGIngestor.pubmed_queries` actually run |
 | `PUBMED_MAX_RESULTS` | `5` | Abstracts fetched per PubMed query |
 | `CHUNK_SIZE` / `CHUNK_OVERLAP` | `1024` / `100` | Sentence splitter settings |
-| `VECTOR_STORE_QUERY_MODE` | `default` | `default` or `hybrid` (dense+sparse) |
+| `SIMILARITY_TOP_K` | `4` | Chunks retrieved per question before the cutoff |
+| `RELATIVE_SCORE_CUTOFF` | `0.9` | Drop chunks scoring below this × the best match; `0` disables |
+| `VECTOR_STORE_QUERY_MODE` | `default` | `default` or `hybrid` (dense + BM25 sparse); reindex after switching |
 | `GROQ_PROMPT_GUARD_MODEL` | `meta-llama/llama-prompt-guard-2-86m` | Input guardrail model |
 | `GROQ_SAFEGUARD_MODEL` | `openai/gpt-oss-safeguard-20b` | Output guardrail model |
 | `PROMPT_GUARD_THRESHOLD` | `0.5` | Malicious-score cutoff for the input guardrail |
