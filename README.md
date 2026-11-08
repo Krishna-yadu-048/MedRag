@@ -223,7 +223,7 @@ docker compose up -d
 | `PUBMED_ENABLED` | `true` | Toggle PubMed ingestion |
 | `PUBMED_QUERY_LIMIT` | `1` | How many of `MedRAGIngestor.pubmed_queries` actually run |
 | `PUBMED_MAX_RESULTS` | `5` | Abstracts fetched per PubMed query |
-| `CHUNK_SIZE` / `CHUNK_OVERLAP` | `1024` / `100` | Sentence splitter settings |
+| `CHUNK_SIZE` / `CHUNK_OVERLAP` | `512` / `64` | Sentence splitter settings |
 | `SIMILARITY_TOP_K` | `4` | Chunks retrieved per question before the cutoff |
 | `RELATIVE_SCORE_CUTOFF` | `0.9` | Drop chunks scoring below this × the best match; `0` disables |
 | `VECTOR_STORE_QUERY_MODE` | `default` | `default` or `hybrid` (dense + BM25 sparse); reindex after switching |

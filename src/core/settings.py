@@ -46,8 +46,8 @@ class AppSettings:
                 os.getenv("EMBEDDING_OUTPUT_DIMENSIONALITY", "384")
             ),
             embedding_batch_size=int(os.getenv("EMBEDDING_BATCH_SIZE", "16")),
-            chunk_size=int(os.getenv("CHUNK_SIZE", "1024")),
-            chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "100")),
+            chunk_size=int(os.getenv("CHUNK_SIZE", "512")),
+            chunk_overlap=int(os.getenv("CHUNK_OVERLAP", "64")),
             query_mode=os.getenv("VECTOR_STORE_QUERY_MODE", "default"),
             similarity_top_k=int(os.getenv("SIMILARITY_TOP_K", "4")),
             sparse_top_k=int(os.getenv("SPARSE_TOP_K", "8")),

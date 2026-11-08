@@ -27,12 +27,16 @@ jobs:
         run: uv run pytest tests
       # The Qdrant service starts empty; without this step the eval test skips itself
       # ("collection is not indexed yet") and the workflow passes without evaluating anything.
+      # PubMed results change daily and the bootstrap seed docs are hand-written, so CI indexes
+      # the guideline PDFs only: the golden dataset is grounded in WHO_BP.pdf.
       - name: Build MedRAG index
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LLAMA_CLOUD_API_KEY: ${{ secrets.LLAMA_CLOUD_API_KEY }}
           QDRANT_HOST: localhost
           QDRANT_PORT: "6333"
+          PUBMED_ENABLED: "false"
+          MEDRAG_INCLUDE_BOOTSTRAP: "false"
         run: |
           uv run python -m src.wait_for qdrant --host localhost --port 6333 --timeout 120
           uv run python -m src.cli index --project medrag
