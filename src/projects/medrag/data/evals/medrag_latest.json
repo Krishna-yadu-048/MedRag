@@ -1,0 +1,145 @@
+{
+  "summary": {
+    "project": "medrag",
+    "collection_name": "medrag_collection_bge_small",
+    "started_at": "2026-11-08T10:18:14.254095Z",
+    "completed_at": "2026-11-08T10:18:53.883430Z",
+    "duration_seconds": 39.63,
+    "dataset_size": 3,
+    "passed_cases": 0,
+    "failed_cases": 3,
+    "success_rate": 0.0,
+    "success": false
+  },
+  "cases": [
+    {
+      "id": "med_001",
+      "query": "What is a common first-line medication approach for type 2 diabetes?",
+      "expected_answer": "Clinical guidelines commonly describe metformin as a standard first-line therapy for type 2 diabetes, depending on patient-specific factors.",
+      "actual_answer": "A common first-line medication approach for type 2 diabetes is the use of metformin, typically combined with lifestyle modifications and glycemic monitoring, provided there are no contraindications.",
+      "sources": [
+        "Bootstrap: bootstrap_seed",
+        "PubMed: Unknown document"
+      ],
+      "retrieval_context": [
+        "Type 2 diabetes management usually begins with lifestyle modification, glycemic monitoring, and metformin when there are no contraindications. Guidelines commonly describe individualized escalation to GLP-1 receptor agonists, SGLT2 inhibitors, or insulin based on comorbidities, kidney function, cardiovascular risk, and glycemic control.",
+        "Type 1 diabetes requires insulin replacement therapy rather than oral first-line agents. Guideline-based care typically includes basal-bolus or pump-based insulin delivery, glucose monitoring, hypoglycemia education, and individualized nutrition planning.",
+        "Frąckowiak U Gawrecki A Araszkiewicz A Adamska A Michalak M Zozulińska-Ziółkiewicz D Bolus calculator in personal insulin pumps — advantages, differences and practical tips Clin Diabetol 2020 9 4 253 258 doi 10.5603/DK.2020.0028 7. Jamil S Mohammadnezhad M Abdulrahim A Muhammad F Khan HTA Managing diabetes one step at a time in low‐ and middle‐income countries: the promise of wearable devices Chronic Dis Transl Med 2025 11 4 279 283 doi 10.1002/cdt3.70018 Medline 41341735 PMC12670968 8. Klatman ",
+        "Originally introduced for T2DM treatment, GLP-1RAs have demonstrated substantial effects on appetite regulation, satiety, delayed gastric emptying, and body weight reduction ( 9 Semaglutide and tirzepatide now achieve levels of weight loss approaching those previously observed mainly after metabolic surgery ( 9 11 9 11 9 11 25 Importantly, these therapies also have documented hepatic effects. In a phase 2 trial in patients with MASH, semaglutide increased the rate of steatohepatitis resolution c"
+      ],
+      "metrics": [
+        {
+          "name": "Answer Relevance",
+          "score": 1.0,
+          "threshold": 0.7,
+          "success": true,
+          "reason": "The score is 1.00 because the response perfectly addressed the question about the common first-line medication approach for type 2 diabetes without any irrelevant information. Great job on staying focused and providing a clear, concise answer!",
+          "error": null
+        },
+        {
+          "name": "Context Relevance",
+          "score": 0.2,
+          "threshold": 0.7,
+          "success": false,
+          "reason": "The score is 0.20 because the majority of the context focuses on aspects unrelated to the input question, such as 'Type 1 diabetes', 'insulin replacement therapy', and 'wearable devices'. However, there is some relevance in the mention of 'metformin' as a common first-line medication for type 2 diabetes management.",
+          "error": null
+        },
+        {
+          "name": "Groundedness",
+          "score": 1.0,
+          "threshold": 0.7,
+          "success": true,
+          "reason": "The score is 1.00 because there are no contradictions present, indicating a perfect alignment between the actual output and the retrieval context. Great job maintaining consistency!",
+          "error": null
+        }
+      ],
+      "success": false
+    },
+    {
+      "id": "med_002",
+      "query": "What kinds of information do hypertension guidelines usually provide?",
+      "expected_answer": "Hypertension guidelines generally cover diagnosis thresholds, blood pressure targets, medication classes, and follow-up recommendations.",
+      "actual_answer": "Hypertension guidelines typically provide information on blood pressure thresholds, target ranges, home blood pressure monitoring, lifestyle changes, and medication classes such as ACE inhibitors, ARBs, calcium-channel blockers, and thiazide-type diuretics. They also outline the follow-up cadence based on the severity of hypertension, symptoms, and treatment response.",
+      "sources": [
+        "Bootstrap: bootstrap_seed",
+        "PubMed: Unknown document"
+      ],
+      "retrieval_context": [
+        "Hypertension guidelines generally cover blood pressure thresholds, target ranges, home blood pressure monitoring, lifestyle changes, and medication classes such as ACE inhibitors, ARBs, calcium-channel blockers, and thiazide-type diuretics. Follow-up cadence depends on severity, symptoms, and treatment response.",
+        "Type 2 diabetes management usually begins with lifestyle modification, glycemic monitoring, and metformin when there are no contraindications. Guidelines commonly describe individualized escalation to GLP-1 receptor agonists, SGLT2 inhibitors, or insulin based on comorbidities, kidney function, cardiovascular risk, and glycemic control.",
+        "Medical guidance in retrieval-augmented systems should include a disclaimer that the information is for educational purposes only and is not a substitute for clinician judgment, diagnosis, or personalized treatment. The disclaimer helps users understand the limits of the retrieved material and encourages consultation with qualified healthcare professionals.",
+        "Frąckowiak U Gawrecki A Araszkiewicz A Adamska A Michalak M Zozulińska-Ziółkiewicz D Bolus calculator in personal insulin pumps — advantages, differences and practical tips Clin Diabetol 2020 9 4 253 258 doi 10.5603/DK.2020.0028 7. Jamil S Mohammadnezhad M Abdulrahim A Muhammad F Khan HTA Managing diabetes one step at a time in low‐ and middle‐income countries: the promise of wearable devices Chronic Dis Transl Med 2025 11 4 279 283 doi 10.1002/cdt3.70018 Medline 41341735 PMC12670968 8. Klatman "
+      ],
+      "metrics": [
+        {
+          "name": "Answer Relevance",
+          "score": 1.0,
+          "threshold": 0.7,
+          "success": true,
+          "reason": "The score is 1.00 because the response perfectly addressed the input question without any irrelevant statements, providing a clear and concise explanation of the information typically found in hypertension guidelines. Great job!",
+          "error": null
+        },
+        {
+          "name": "Context Relevance",
+          "score": 0.25,
+          "threshold": 0.7,
+          "success": false,
+          "reason": "The score is 0.25 because the majority of the retrieval context focuses on diabetes management, which is unrelated to hypertension guidelines. However, there is some relevant information about hypertension guidelines, such as 'blood pressure thresholds, target ranges, home blood pressure monitoring, lifestyle changes, and medication classes,' which slightly contributes to the relevancy score.",
+          "error": null
+        },
+        {
+          "name": "Groundedness",
+          "score": 1.0,
+          "threshold": 0.7,
+          "success": true,
+          "reason": "The score is 1.00 because there are no contradictions present, indicating a perfect alignment between the actual output and the retrieval context. Great job maintaining consistency!",
+          "error": null
+        }
+      ],
+      "success": false
+    },
+    {
+      "id": "med_003",
+      "query": "Why should retrieved medical guidance include a disclaimer?",
+      "expected_answer": "Medical RAG systems should clarify that outputs are educational and not a substitute for clinician judgment or personalized care.",
+      "actual_answer": "Retrieved medical guidance should include a disclaimer because the information is intended for educational purposes only and does not replace clinician judgment, diagnosis, or personalized treatment. This disclaimer helps users understand the limitations of the material and encourages them to consult qualified healthcare professionals for tailored advice.",
+      "sources": [
+        "Bootstrap: bootstrap_seed",
+        "PubMed: Unknown document"
+      ],
+      "retrieval_context": [
+        "Medical guidance in retrieval-augmented systems should include a disclaimer that the information is for educational purposes only and is not a substitute for clinician judgment, diagnosis, or personalized treatment. The disclaimer helps users understand the limits of the retrieved material and encourages consultation with qualified healthcare professionals.",
+        "All items used a 3-point Likert scale: agree, neutral, and disagree. An optional open-ended question was included in both surveys for participant feedback. Full questionnaires are provided in Multimedia Appendices 1 2 Pilot Testing and Validation of the Developed App Study Design This study used a cross-sectional, pilot feasibility design and was conducted at the Endocrine Centre in Basra, Iraq, between May and June 2025. The pilot study followed current recommendations for feasibility and usabi",
+        "A purposive sample of 10 health care professionals (5 endocrinologists, 2 dietitians, 2 clinical pharmacists, and 1 diabetes educator) and 10 patients with T1DM (aged ≥15 y) was recruited. The app was installed on participants’ smartphones, and standardized instructions on its functions and usage were provided. After a 10- to 14-day trial period, participants evaluated the usability, satisfaction, and perceived benefits of the app using newly developed and validated 3-point Likert scale question",
+        "Evaluation should therefore report subgroup sensitivity, specificity, and calibration; perform external validation across institutions and devices; document inter-rater uncertainty for TCM labels; and include post-deployment drift monitoring and periodic fairness audits. A high aggregate accuracy should not substitute for subgroup performance and calibration assessment. 6.3 Digital literacy and acceptance of primary healthcare personnel The insufficient digital literacy and low acceptance of dig"
+      ],
+      "metrics": [
+        {
+          "name": "Answer Relevance",
+          "score": 1.0,
+          "threshold": 0.7,
+          "success": true,
+          "reason": "The score is 1.00 because the response perfectly addressed the question about the necessity of including a disclaimer in retrieved medical guidance. The answer was clear, focused, and directly relevant to the input, with no irrelevant statements present. Great job on providing a precise and relevant explanation!",
+          "error": null
+        },
+        {
+          "name": "Context Relevance",
+          "score": 0.14285714285714285,
+          "threshold": 0.7,
+          "success": false,
+          "reason": "The score is 0.14 because the majority of the retrieval context statements focus on survey methodology, study design, and app evaluation, which are unrelated to the need for disclaimers in medical guidance. Only two statements directly address the importance of disclaimers in medical guidance, emphasizing their role in clarifying the educational purpose of the information and encouraging professional consultation.",
+          "error": null
+        },
+        {
+          "name": "Groundedness",
+          "score": 1.0,
+          "threshold": 0.7,
+          "success": true,
+          "reason": "The score is 1.00 because there are no contradictions present, indicating a perfect alignment between the actual output and the retrieval context. Great job maintaining consistency!",
+          "error": null
+        }
+      ],
+      "success": false
+    }
+  ]
+}
